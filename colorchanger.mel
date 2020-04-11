@@ -1,6 +1,12 @@
 //v4.2.2
 //Author: Mitchell Mortenson
 
+//Place script in Documents/maya/<version>/sripts
+//Open script editor and click on File, Source Sript...
+//Choose colorchanger.mel
+//Type colorchanger in the MEL script editor
+//Execute
+
 
 //GUI setup
 global proc changecolor (){
@@ -33,7 +39,7 @@ global proc changecolor (){
 	checkBox -l "Break connections" -v 0 breakconnectionschbx;
 
 	//multiplecolorchanger button
-	button -h 50 -ann "Change the color of every nth frame, set a keyframe, goe back one frame, set a keyframe" -l "Multiple frame color change" -c "mltplframeclrchng";
+	button -h 50 -ann "Change the color of every nth frame, set a keyframe, go back one frame, set a keyframe" -l "Multiple frame color change" -c "mltplframeclrchng";
 	
 	//Currentframeclrchng floatSliderGrp
 	button -h 50 -ann "Change the color of all selected lights and set a keyframe on the current frame" -l "Current frame color change" -c currentframeclrchng;
@@ -52,7 +58,7 @@ global proc changecolor (){
 }
 
 
-//Action to change the color of every nth frame, set a keyframe, goe back one frame, set a keyframe
+//Action to change the color of every nth frame, set a keyframe, go back one frame, set a keyframe
 global proc mltplframeclrchng () {
 	//Set the number of frames that you want to skip
 	int $frameskip = `floatSliderGrp -q -value frameskipslider`;
