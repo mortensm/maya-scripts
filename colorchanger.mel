@@ -1,118 +1,242 @@
-//v3.2
+//v4.2.2
+//Author: Mitchell Mortenson
 
-//User setup on line 8 and 10
+
+//GUI setup
+global proc changecolor (){
+	int $lastframe = `playbackOptions  -q -aet`;
+	int $frameskip = 24;
+	
+	if(`window -q -ex "window1_ui"`)deleteUI("window1_ui");
+	window -t "Random Color Changer" -rtf 1 "window1_ui";
+	columnLayout -w 600 -adj 1 -cw 5;
+	
+	text -l "Set the frame that you want to start on" -ww 1;
+	
+	//Startframe floatSliderGrp
+	floatSliderGrp -f 1 -min 1.0 -max $lastframe -pre 0 -fs 1.0 -v 1.0  -cc setlastframe -dc setlastframe startframeslider;
+	
+	text -en 1 -l "Set the number of frames that you want to skip" -ww 1;
+	
+	//Frameskip floatSliderGrp
+	floatSliderGrp -f 1 -min 1.0 -max $lastframe -pre 0 -fs 1.0 -v $frameskip -cc gobackframes -dc gobackframes frameskipslider;
+	
+	text -en 1 -l "Set the number of frames that you want to go back" -ww 1;
+		
+	//Gobackframeslider floatSliderGrp
+	floatSliderGrp -f 1 -min 1.0 -max $frameskip -pre 0 -fs 1.0 -v 1.0 gobackframeslider;
+	
+	//Gobackframes checkBox
+	checkBox -l "Go back frames" -v 1 -cc dsblgobackframesslider gobackframeschbx;
+
+	//Break connections checkBox
+	checkBox -l "Break connections" -v 0 breakconnectionschbx;
+
+	//multiplecolorchanger button
+	button -h 50 -ann "Change the color of every nth frame, set a keyframe, goe back one frame, set a keyframe" -l "Multiple frame color change" -c "mltplframeclrchng";
+	
+	//Currentframeclrchng floatSliderGrp
+	button -h 50 -ann "Change the color of all selected lights and set a keyframe on the current frame" -l "Current frame color change" -c currentframeclrchng;
+	
+	//Breakallconnections button
+	button -h 50 -ann "Breaks all color connections" -l "Break connections" -c breakallconnections;
+	
+	//Putkeyframe button
+	button -h 50 -ann "Put a keyframe on the current frame on all selected lights" -l "Put keyframe" -c putkeyframe;
+	
+	//Colorchanger button
+	button -h 50 -ann "Change the colors of all selected lights." -l "Change color" -c colorchanger;
+	
+	helpLine;
+	showWindow "window1_ui";
+}
+
 
 //Action to change the color of every nth frame, set a keyframe, goe back one frame, set a keyframe
 global proc mltplframeclrchng () {
 	//Set the number of frames that you want to skip
-	int $frameskip = 72;
+	int $frameskip = `floatSliderGrp -q -value frameskipslider`;
 	//Set the frame number that you want to start on
-	int $startframe = 1;
-	//Set whether you want to break connections or not	
-	boolean $breakconnection = false;
-	
+	int $startframe = `floatSliderGrp -q -value startframeslider`;
+	//Set whether you want to break connections or not
+	int $breakconnection = `checkBox -q -value breakconnectionschbx`;
+	int $gobackframes = `checkBox -q -value gobackframeschbx`;
 	int $cframe = `currentTime -q`;
 	string $selectedlightshape[] = `ls -sl -dag -lf`;
 	int $nbroflights = `size($selectedlightshape)`;
 	
-	print ("\n");
-	print ("\n");
-	print ("-------------------------------");
-	print ("\n" + "There are " + $nbroflights + " lights selected." + "\n");
-	
-	if ($breakconnection == true){
-		print ("Breaking all color connections");
-		breakconnections;
-	}
-	else(){
+	intro;
+	if ($nbroflights == 0){
+		print ("You don't have any lights selected. Please select some.");
 	}
 	
-	print ("Starting on frame " + $startframe + "." + "\n");
-	print ("Changing colors every " + $frameskip+ " frames." + "\n" + "\n");
+	else {
+		if ($nbroflights == 1){
+			print ("There is 1 light selected.");
+		}
+		else { 	
+			print ("There are " + $nbroflights + " lights selected.");
+		}
+		print ("\n");
+			
+		if ($breakconnection == 1){
+			breakallconnections;
+		}
+		else {
+			print("Keepiing all color keyframes.");
+			print ("\n");
+		}
+		
+		print ("Starting on frame " + $startframe + ".");
+		print ("\n");
+		print ("Changing colors every " + $frameskip + " frames.");
+		print ("\n");
+		print ("\n");
 
-	//Go to the frame that was set from $startframe
-	currentTime($startframe);
+		if ($gobackframes == 0){
+			//Go to the frame that was set from $startframe
+			currentTime($startframe);
+			
+			print ("\n");
+			print ("Moved to frame " + $startframe + ".");
+			print ("\n");
+			print ("\n");
+			colorchanger;
+			putkeyframe; 
+			currentTime(`currentTime -q`+ $frameskip - 1);
+			
+			//If current frame is less than or equal to $lastframe then set a keyframe on the current frame and move forward the number of frames that was set by $frameskip
+			//Makes sure it doesn't go past the set timeline
+			for ($lastframe = `playbackOptions  -q -aet`; `currentTime -q` <= $lastframe; (currentTime(`currentTime -q`+ $frameskip))){
+			
+				currentTime (`currentTime -q`);
+				print ("Moved to frame " + `currentTime -q` + ".");
+				print ("\n");
+				colorchanger;
+				putkeyframe;
+			}
+		}
+		else {
+			//Go to the frame that was set from $startframe
+			currentTime($startframe);
+			
+			print ("\n");
+			print ("Moved to frame " + $startframe + ".");
+			print ("\n");
+			print ("\n");
+			colorchanger;
+			putkeyframe; 
+			currentTime(`currentTime -q`+ $frameskip - 1);
+			
+			//If current frame is less than or equal to $lastframe then set a keyframe on the current frame and move forward the number of frames that was set by $frameskip
+			//Makes sure it doesn't go past the set timeline
+			for ($lastframe = `playbackOptions  -q -aet`; `currentTime -q` <= $lastframe; (currentTime(`currentTime -q`+ $frameskip))){
+			
+				currentTime (`currentTime -q` - `floatSliderGrp -q -value gobackframeslider`);
+				print ("Moved to frame " + `currentTime -q` + ".");
+				print ("\n");
+				putkeyframe;
+				currentTime (`currentTime -q` + `floatSliderGrp -q -value gobackframeslider`);
+				print ("Moved to frame " + `currentTime -q` + ".");
+				print ("\n");
+				colorchanger;
+				putkeyframe;
+			}
+		}
 	
-	print ("Moved to frame " + $startframe + "." + "\n");
-	colorchanger;
-	putkeyframe; 
-	currentTime(`currentTime -q`+ $frameskip - 1);
-	
-	//If current frame is less than or equal to $lastframe then set a keyframe on the current frame and move forward the number of frames that was set by $frameskip
-	for ($lastframe = `playbackOptions  -q -aet`; `currentTime -q` <= $lastframe; (currentTime(`currentTime -q`+ $frameskip))){
-	
-		currentTime (`currentTime -q`- 1);
-		print ("Moved to frame " + `currentTime -q` + "." + "\n");
-		putkeyframe;
-		currentTime (`currentTime -q`+ 1);
-		print ("Moved to frame " + `currentTime -q` + "." + "\n");
-		colorchanger;
-		putkeyframe;
+		//move back to the working frame
+		currentTime($cframe);
+		print ("\n");
+		print ("\n");
+		print ("Moved back to working frame.");
 	}
-	
-	currentTime($cframe);
-	print ("Moved back to working frame." + "\n");
-	print ("-------------------------------");
-	print ("\n");
-	print ("\n");
+	outro;
 }
 
 
 //Action to set a keyframe on the previous frame of the colors of the currently selected lights, then change the color of the currently selected lights and set a keyframe on the current frame
-global proc currentframeclrchng() {
+global proc currentframeclrchng () {
 	//variable for current frame
 	int $cframe = `currentTime -q`;
 	//variable for last frame
 	int $lastframe = `playbackOptions  -q -aet`;
 	string $selectedlightshape[] = `ls -sl -dag -lf`;
 	int $nbroflights = `size($selectedlightshape)`;
+	int $breakconnection = `checkBox -q -value breakconnectionschbx`;
+	int $gobackframes = `checkBox -q -value gobackframeschbx`;
 
-	print ("\n");
-	print ("\n");
-	print ("\n");
+	intro;
 	
 	if ($nbroflights == 0){
-	print ("You don't have any lights selected.");
+		print ("You don't have any lights selected. Please select some.");
 	}
 	
-	else{
-		//change color and set keyframe of first frame
-		if ($cframe == 1){
-			print ("\n" + "There are " + $nbroflights + " lights selected." + "\n" + "\n");
+	else {
+		if ($breakconnection == 1){
+			breakallconnections;
+		}
+		else{
+			print("Keepiing all color keyframes.");
+			print ("\n");
+		}
+		
+		//change color and set keyframe if the current frame is the first frame or gobackframeschbx is unchecked
+		if ($cframe == 1 || $gobackframes == 0){
+			print ("\n");
+			print ("There are " + $nbroflights + " lights selected.");
+			print ("\n");
+			print ("\n");
 			colorchanger;
 			putkeyframe;
 		}
 
+		/*
 		//check if current frame is last frame
 		else if ($cframe == $lastframe) {
-			print ("\n" + "There are " + $nbroflights + " lights selected." + "\n" + "\n");
-			print ("\n" + "You don't want to put a keyframe there." + "\n" + "\n");
+			print ("There are " + $nbroflights + " lights selected.");
+			print ("\n");
+			print ("\n");
+			print ("You don't want to put a keyframe there.");
 		}
-
-		//Go back one frame, set a keyframe, go forward one frame, change color and set keyframe
+		*/
+		
+		//If gobackframeschbx is checked, go back one frame, set a keyframe, go forward one frame, change color and set keyframe
 		else {
-			currentTime (`currentTime -q`- 1);
+			currentTime (`currentTime -q`- `floatSliderGrp -q -value gobackframeslider`);
 			putkeyframe;
-			currentTime (`currentTime -q`+ 1);
+			currentTime (`currentTime -q`+ `floatSliderGrp -q -value gobackframeslider`);
 			colorchanger;
 			putkeyframe;
 		}
 	}
+
+	outro;
 }
 
 
-//Break and delete the r,g,and b color nodes attached to the lightShape node
-global proc breakconnections (){
+//Break and delete the red, green, and blue keyframe color nodes attached to the lightShape node
+global proc breakallconnections (){
 	string $selectedlightshape[] = `ls -sl -dag -lf`;
 	int $nbroflights = `size($selectedlightshape)`;
-	
-	for	($obj = 0; $obj < $nbroflights; $obj ++){
-		//.sc is the selected light's color atribute
-		CBdeleteConnection ($selectedlightshape[$obj] + ".scr");
-		CBdeleteConnection ($selectedlightshape[$obj] + ".scg");
-		CBdeleteConnection ($selectedlightshape[$obj] + ".scb");
+
+	if ($nbroflights == 0){
+		print ("You don't have any lights selected. Please select some.");
 	}
-	print ("Deleted all keyframes." + "\n" + "\n");
+	
+	else{
+		for	($obj = 0; $obj < $nbroflights; $obj ++){
+			//.sc(r/g/b) is the selected light's color attribute
+			CBdeleteConnection ($selectedlightshape[$obj] + ".scr");
+			CBdeleteConnection ($selectedlightshape[$obj] + ".scg");
+			CBdeleteConnection ($selectedlightshape[$obj] + ".scb");
+		}
+		
+		//intro;
+		print ("\n");
+		print ("Deleted any color keyframes.");
+		print ("\n");
+		//outro;
+	}
 }
 
 
@@ -121,11 +245,22 @@ global proc putkeyframe (){
 	string $selectedlightshape[] = `ls -sl -dag -lf`;
 	int $nbroflights = `size($selectedlightshape)`;
 	
-	for	($obj = 0; $obj < $nbroflights; $obj ++){
-		//.sc is the selected light's color atribute
-		setKeyframe ($selectedlightshape[$obj] + ".sc");
+	if ($nbroflights == 0){
+		print ("You don't have any lights selected. Please select some.");
 	}
-	print ("Set a keyframe on frame " + `currentTime -q` + "." + "\n" + "\n");
+	
+	else{
+		for	($obj = 0; $obj < $nbroflights; $obj ++){
+			//.sc is the selected light's color attribute
+			setKeyframe ($selectedlightshape[$obj] + ".sc");
+		}
+		
+		//intro;
+		print ("\n");
+		print ("Set a keyframe on frame " + `currentTime -q` + ".");
+		print ("\n");
+		//outro;
+	}
 }
 
 
@@ -135,46 +270,102 @@ global proc colorchanger (){
 	string $selectedlightname[] = `ls -sl`;
 	int $nbroflights = `size($selectedlightshape)`;
 	
-	//Randomly change color of selected lights to red, yellow, green, cyan, blue, or magenta
-	//Variable "$obj" is the currently selected light
-	for	($obj = 0; $obj < $nbroflights; $obj ++){
-		int $rng = rand (1,6);
-		
-		//red
-		if ($rng == 1){
-			setAttr ($selectedlightshape[$obj] + ".color") -type double3 1 0 0 ;
-			print ("Set " + $selectedlightname[$obj] + " to red." + "\n");
-		}
-		
-		//yellow
-		else if ($rng == 2){
-			setAttr ($selectedlightshape[$obj] + ".color") -type double3 1 1 0 ;
-			print ("Set " + $selectedlightname[$obj] + " to yellow." + "\n");
-		}
-		
-		//green
-		else if ($rng == 3){
-			setAttr ($selectedlightshape[$obj] + ".color") -type double3 0 1 0 ;
-			print ("Set " + $selectedlightname[$obj] + " to green." + "\n");
-		}
-		
-		//cyan
-		else if ($rng == 4){
-			setAttr ($selectedlightshape[$obj] + ".color") -type double3 0 1 1 ;
-			print ("Set " + $selectedlightname[$obj] + " to cyan." + "\n");
-		}
-		
-		//blue
-		else if ($rng == 5){
-			setAttr ($selectedlightshape[$obj] + ".color") -type double3 0 0 1 ;
-			print ("Set " + $selectedlightname[$obj] + " to blue." + "\n");
-		}
-		
-		//magenta
-		else if($rng == 6){
-			setAttr ($selectedlightshape[$obj] + ".color") -type double3 1 0 1 ;
-			print ("Set " + $selectedlightname[$obj] + " to magenta." + "\n");
+	if ($nbroflights == 0){
+		print ("You don't have any lights selected. Please select some.");
+	}
+	
+	else{
+		//Randomly change color of selected lights to red, yellow, green, cyan, blue, or magenta
+		//Variable "$obj" is the currently selected light in the array
+		for	($obj = 0; $obj < $nbroflights; $obj ++){
+			int $rng = rand (1,7);
+			
+			//red
+			if ($rng == 1){
+				setAttr ($selectedlightshape[$obj] + ".color") -type double3 1 0 0 ;
+				print ("Set " + $selectedlightname[$obj] + " to red.");
+				print ("\n");
+			}
+			
+			//yellow
+			else if ($rng == 2){
+				setAttr ($selectedlightshape[$obj] + ".color") -type double3 1 1 0 ;
+				print ("Set " + $selectedlightname[$obj] + " to yellow.");
+				print ("\n");
+			}
+			
+			//green
+			else if ($rng == 3){
+				setAttr ($selectedlightshape[$obj] + ".color") -type double3 0 1 0 ;
+				print ("Set " + $selectedlightname[$obj] + " to green.");
+				print ("\n");
+			}
+			
+			//cyan
+			else if ($rng == 4){
+				setAttr ($selectedlightshape[$obj] + ".color") -type double3 0 1 1 ;
+				print ("Set " + $selectedlightname[$obj] + " to cyan.");
+				print ("\n");
+			}
+			
+			//blue
+			else if ($rng == 5){
+				setAttr ($selectedlightshape[$obj] + ".color") -type double3 0 0 1 ;
+				print ("Set " + $selectedlightname[$obj] + " to blue.");
+				print ("\n");
+			}
+			
+			//magenta
+			else {
+				setAttr ($selectedlightshape[$obj] + ".color") -type double3 1 0 1 ;
+				print ("Set " + $selectedlightname[$obj] + " to magenta.");
+				print ("\n");
+			}
 		}
 	}
 }
 
+
+proc dsblgobackframesslider (){
+	int $gobackframes = `checkBox -q -v gobackframeschbx`;
+
+	floatSliderGrp -edit -en $gobackframes gobackframeslider;
+}
+
+
+proc setlastframe (){
+	$lastframe = `playbackOptions  -q -aet`;
+	
+	floatSliderGrp -edit -max $lastframe startframeslider;
+	floatSliderGrp -edit -max $lastframe frameskipslider;
+}
+
+
+proc gobackframes (){
+	int $frameskip = `floatSliderGrp -q -v frameskipslider`;
+	int $lastframe = `playbackOptions  -q -aet`;
+
+	floatSliderGrp -edit -max $frameskip gobackframeslider;
+	floatSliderGrp -edit -max $lastframe startframeslider;
+	floatSliderGrp -edit -max $lastframe frameskipslider;
+	
+	if ($frameskip < `floatSliderGrp -q -v frameskipslider`){
+		floatSliderGrp -edit -value $frameskip gobackframeslider;
+	}
+}
+
+
+proc intro (){
+	print ("\n");
+	print ("\n");
+	print ("-------------------------------");
+	print ("\n");
+}
+
+
+proc outro (){
+	print ("\n");
+	print ("-------------------------------");
+	print ("\n");
+	print ("\n");
+}
