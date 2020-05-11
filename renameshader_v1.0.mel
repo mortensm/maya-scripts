@@ -1,0 +1,229 @@
+//Rename Shader
+//v1.0
+//author Mitchell Mortenson
+
+//Instructions
+/*
+
+1. Copy all code 
+2. Paste into the Maya script editor under a MEL tab 
+3. Click 'Execute'
+4. (Optional) Click 'Save script to shelf' to save this script to your current shelf
+
+*/
+
+//Note: Auto-Renamer is only designed for the aiStandardSurface shader
+
+global proc renameShader_UI(){
+	if(`window -q -ex "window1"`)deleteUI("window1");
+	window -t "Rename Shader" -s false "window1";
+
+    string $shaderTextFieldText;
+    string $shadingGroupTextFieldText;
+    string $selectedObjName[] = ls("-dag", "-o", "-sl");
+    
+	columnLayout -adj true "columnLayout1";
+	rowLayout -nc 1;
+	text -l "Material Name";
+	rowLayout -p "columnLayout1" -nc 3;
+    textField -en 1 -ann "New name of the material" -tx $shaderTextFieldText -ed 0 "shaderTextField";
+	checkBox -en false -ann "add _aiSt suffix to the material name" -l "Add Suffix" -v true "shaderSuffixCheckBox";
+	checkBox -ann "Auto-Rename material to the object's name" -l "Auto-Rename" -v true -cc dsblShaderTextField "shaderAutoRenameCheckBox";
+	rowLayout -p "columnLayout1" -nc 1;
+	text -l "Shading Group Name";
+	rowLayout -p "columnLayout1" -nc 3;
+    textField -en 1 -ann "New name of the shader group" -tx $shadingGroupTextFieldText -ed 0 "SGTextField";
+	checkBox -en false -ann "add _aiStSG suffix to the shadere group name" -l "Add Suffix" -v true "SGSuffixCheckBox";
+	checkBox -ann "Auto-Rename shader group to the material's name" -l "Auto-Rename" -v true -cc dsblSGTextField "SGAutoRenameCheckBox";
+	button -p "columnLayout1" -l "Rename" -c renameShader;
+	showWindow "window1";
+}
+
+
+proc renameShader(){
+	//new shader name
+	//ex: box
+	string $newShaderName;
+	
+	//new shader group name
+	//ex: cube
+	string $newShaderGroupName;
+	
+	//selected objet's Name
+	//ex: pCube1
+	string $selectedObjName[] = ls("-dag", "-o", "-sl");
+	
+	//selected object's Shape node
+	//ex: pCubeShape1
+	string $selectedObjShape[] = ls("-dag", "-o", "-s", "-sl");
+
+
+	//checks that only one object is selected
+	if (size ($selectedObjShape) != 1){
+		intro;
+		print "Invalid number of objects selected. Select one object.";
+	}
+	
+	//checks that either shaderAutoRenameCheckBox is checked or there contains text in shaderTextField
+	else if ((`checkBox  -q -v shaderAutoRenameCheckBox` == 0) && (`textField -q -tx shaderTextField` == "")){
+		intro;
+		print "No material name given. Type in a material name or check Auto-Rename.";
+	}
+
+	//checks that either SGAutoRenameCheckBox is checked or there contains text in SGTextField	
+	else if ((`checkBox  -q -v SGAutoRenameCheckBox` == 0) && (`textField -q -tx SGTextField` == "")){
+		intro;
+		print "No shading groups given. Type in a shading group name or check Auto-Rename.";
+	}
+	
+	//if one object is selected and a combination of the Auto-RenamecheckBox's are checked, or there contains text in shaderTextField or SGTextField
+	else{
+	
+		//if shaderAutoRenameCheckBox is checked, change $newShaderName to $selectedObjShape + "_aiSt"
+		//ex: 'aiStandardSurface1' becomes 'pCubeShape1_aiSt'
+		if (`checkBox  -q -v shaderAutoRenameCheckBox` == 1){
+			$newShaderName = ($selectedObjName[0] + "_aiSt");
+		}
+		
+		//if shaderAutoRenameCheckBox is unchecked and shaderSuffixCheckBox is checked, change $newShaderName to shaderTextField (input) + "_aiSst"
+		//ex: 'aiStandardSurface1' becomes 'box_aiSt'
+		else if (`checkBox  -q -v shaderSuffixCheckBox` == 1){
+			$newShaderName = (`textField -q -tx shaderTextField` + "_aiSt");
+		}
+		
+		//if shaderAutoRenameCheckBox and shaderSuffixCheckBox are unchecked, change $newShaderName to shaderTextField )input)
+		//ex: 'aiStandardSurface1' becomes 'box'
+		else{
+			$newShaderName = `textField -q -tx shaderTextField`;
+		}
+		
+	/////////////////////////////
+
+		//if shaderAutoRenameCheckBox is checked
+		if(`checkBox  -q -v shaderAutoRenameCheckBox` == 1){
+
+			//if shaderAutoRenameCheckBox is checked and SGAutoRenameCheckBox is checked, change $newShaderGroupName to $selectedObjName + "_aiStSG"
+			//ex: 'aiStandardSurface1SG' becomes 'box_aiStSG'
+			if(`checkBox  -q -v SGAutoRenameCheckBox` == 1){
+				$newShaderGroupName = ($selectedObjName[0] + "_aiStSG");
+			}
+			
+			//if SGAutoRenameCheckBox is unchecked and SGSuffixCheckBox is checked, change $newShaderGroupName to SGTextField (input) + "_aiStSG"
+			//ex: 'aiStandardSurface1SG' becomes 'cube_aiStSG'
+			else if(`checkBox  -q -v SGSuffixCheckBox` == 1) {
+				$newShaderGroupName = (`textField -q -tx SGTextField` + "_aiStSG");
+			}
+			
+			//if SGAutoRenameCheckBox and SGSuffixCheckBox are unchecked, change $newShaderGroupName to SGTextField (input)
+			//ex: 'aiStandardSurface1SG' becomes 'cube'
+			else{
+				$newShaderGroupName = `textField -q -tx SGTextField`;
+			}
+		}
+		
+		//if shaderAutoRenameCheckBox is unchecked
+		else{
+			//if SGAutoRenameCheckBox is checked, change $newShaderGroupName to newShaderName (input) + "SG"
+			//ex: 'aiStandardSurface1SG' becomes 'pCubeShape1_aiStSG' or 'box_aiStSG' depending on whether shaderAutoRenameCheckBox is checked or not
+			if(`checkBox  -q -v SGAutoRenameCheckBox` == 1){
+				$newShaderGroupName = (`textField -q -tx shaderTextField` + "_aiStSG");
+			}
+			
+			//if SGAutoRenameCheckBox is unchecked and SGSuffixCheckBox is checked, change newShaderGroupName to SGTextField (input) + "_aiStSG"
+			//ex: 'aiStandardSurface1SG' becomes 'cube_aiStSG'
+			else if(`checkBox  -q -v SGSuffixCheckBox` == 1) {
+				$newShaderGroupName = (`textField -q -tx SGTextField` + "_aiStSG");
+			}
+			
+			//if SGAutoRenameCheckBox and SGSuffixCheckBox are unchecked, change $newShaderGroupName to SGTextField (input)
+			//ex: 'aiStandardSurface1SG' becomes 'cube'
+			else{
+				$newShaderGroupName = `textField -q -tx SGTextField`;
+			}
+		}
+		
+		//shading groups of $selectedObjShape excluding duplicates
+		string $originalShadingGroupName[] = stringArrayRemoveDuplicates(listConnections("-t", "shadingEngine", $selectedObjShape));
+		
+		//shader of $selectedObjShape
+		string $originalShaderName[] = ls("-mat", listConnections($originalShadingGroupName));
+		
+		intro;
+	
+		print "Original material name: ";
+		print $originalShaderName;
+		print "Original shading group name: ";
+		print $originalShadingGroupName;
+		print "\n";
+		print "\n";
+		
+		//rename $originalShaderName to $newShaderName
+		rename $originalShaderName $newShaderName;	
+		//rename $originalShadingGroupName to $newShaderGroupName
+		rename $originalShadingGroupName $newShaderGroupName;
+				
+		print "New material name: ";
+		print $newShaderName;
+		print "\n";	
+		print "New shading group name: ";
+		print $newShaderGroupName;
+	
+		outro;
+	}
+}
+
+//disable shaderTextField and shaderSuffixCheckBox if shaderAutoRenameCheckBox is checked
+proc dsblShaderTextField(){
+	//if shaderAutoRenameCheckBox is checked disable editing of shaderTextField and disable shaderSuffixCheckBox
+	if (`checkBox -q -v shaderAutoRenameCheckBox` ==1){
+		textField -edit -ed 0 shaderTextField;
+		checkBox -edit -v 1 -en 0 shaderSuffixCheckBox;
+	}
+	
+	//if shaderAutoRenameCheckBox is unchecked enable editing of shaderTextField and enable shaderSuffixCheckBox	
+	else {
+		textField -edit -ed 1 shaderTextField;
+		checkBox -edit -en 1 shaderSuffixCheckBox;
+	}
+}
+
+
+//disable SGTextField and SGSuffixCheckBox if SGAutoRenameCheckBox is checked
+proc dsblSGTextField(){
+	//if SGAutoRenameCheckBox is checked disable editing of SGTextField and disable SGSuffixCheckBox
+	if (`checkBox -q -v SGAutoRenameCheckBox` ==1){
+		textField -edit -ed 0 SGTextField;
+		checkBox -edit -v 1 -en 0 SGSuffixCheckBox;
+	}
+	
+	//if SGAutoRenameCheckBox is unchecked enable editing of SGTextField and enable SGSuffixCheckBox	
+	else {
+		textField -edit -ed 1 SGTextField;
+		checkBox -edit -en 1 SGSuffixCheckBox;
+	}
+}
+
+
+//intro text
+proc intro (){
+	print "\n";
+	print "\n";
+	print "\n";
+	print "\n";
+	print "-------------------------------";
+	print "\n";
+	print "-------------------------------";
+	print "\n";
+}
+
+
+//outro text
+proc outro (){
+	print "\n";
+	print "-------------------------------";
+	print "\n";
+	print "Renaming complete";
+}
+
+//execute script
+renameShader_UI();
