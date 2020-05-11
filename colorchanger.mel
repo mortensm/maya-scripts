@@ -1,15 +1,19 @@
-//v4.2.2
+//v4.3.0
 //Author: Mitchell Mortenson
 
-//Place script in Documents/maya/<version>/sripts
-//Open script editor and click on File, Source Sript...
-//Choose colorchanger.mel
-//Type colorchanger in the MEL script editor
-//Execute
+//Instructions
+/*
+
+1. Copy all code 
+2. Paste into the Maya script editor under a MEL tab 
+3. Click 'Execute'
+4. (Optional) Click 'Save script to shelf' to save this script to your current shelf
+
+*/
 
 
 //GUI setup
-global proc changecolor (){
+global proc changecolor_UI (){
 	int $lastframe = `playbackOptions  -q -aet`;
 	int $frameskip = 24;
 	
@@ -59,7 +63,7 @@ global proc changecolor (){
 
 
 //Action to change the color of every nth frame, set a keyframe, go back one frame, set a keyframe
-global proc mltplframeclrchng () {
+proc mltplframeclrchng () {
 	//Set the number of frames that you want to skip
 	int $frameskip = `floatSliderGrp -q -value frameskipslider`;
 	//Set the frame number that you want to start on
@@ -161,7 +165,7 @@ global proc mltplframeclrchng () {
 
 
 //Action to set a keyframe on the previous frame of the colors of the currently selected lights, then change the color of the currently selected lights and set a keyframe on the current frame
-global proc currentframeclrchng () {
+proc currentframeclrchng () {
 	//variable for current frame
 	int $cframe = `currentTime -q`;
 	//variable for last frame
@@ -221,7 +225,7 @@ global proc currentframeclrchng () {
 
 
 //Break and delete the red, green, and blue keyframe color nodes attached to the lightShape node
-global proc breakallconnections (){
+proc breakallconnections (){
 	string $selectedlightshape[] = `ls -sl -dag -lf`;
 	int $nbroflights = `size($selectedlightshape)`;
 
@@ -247,7 +251,7 @@ global proc breakallconnections (){
 
 
 //Sets a keyframe on the current frame for the color of every selected light 
-global proc putkeyframe (){
+proc putkeyframe (){
 	string $selectedlightshape[] = `ls -sl -dag -lf`;
 	int $nbroflights = `size($selectedlightshape)`;
 	
@@ -271,7 +275,7 @@ global proc putkeyframe (){
 
 
 //List all selected lights and randomly change the color
-global proc colorchanger (){
+proc colorchanger (){
 	string $selectedlightshape[] = `ls -sl -dag -lf`;
 	string $selectedlightname[] = `ls -sl`;
 	int $nbroflights = `size($selectedlightshape)`;
@@ -375,3 +379,6 @@ proc outro (){
 	print ("\n");
 	print ("\n");
 }
+
+
+changecolor_UI ()
