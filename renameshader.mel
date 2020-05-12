@@ -1,5 +1,5 @@
 //Rename Shader
-//v1.0
+//v1.0.1
 //author Mitchell Mortenson
 
 //Instructions
@@ -12,27 +12,29 @@
 
 */
 
-//Note: Auto-Renamer is only designed for the aiStandardSurface shader
+//Note: Auto-Rename is only designed for the aiStandardSurface shader
 
+
+//GUI setup
 global proc renameShader_UI(){
 	if(`window -q -ex "window1"`)deleteUI("window1");
 	window -t "Rename Shader" -s false "window1";
 
-    string $shaderTextFieldText;
-    string $shadingGroupTextFieldText;
-    string $selectedObjName[] = ls("-dag", "-o", "-sl");
+	string $shaderTextFieldText;
+	string $shadingGroupTextFieldText;
+	string $selectedObjName[] = ls("-dag", "-o", "-sl");
     
 	columnLayout -adj true "columnLayout1";
 	rowLayout -nc 1;
 	text -l "Material Name";
 	rowLayout -p "columnLayout1" -nc 3;
-    textField -en 1 -ann "New name of the material" -tx $shaderTextFieldText -ed 0 "shaderTextField";
+	textField -en 1 -ann "New name of the material" -tx $shaderTextFieldText -ed 0 "shaderTextField";
 	checkBox -en false -ann "add _aiSt suffix to the material name" -l "Add Suffix" -v true "shaderSuffixCheckBox";
 	checkBox -ann "Auto-Rename material to the object's name" -l "Auto-Rename" -v true -cc dsblShaderTextField "shaderAutoRenameCheckBox";
 	rowLayout -p "columnLayout1" -nc 1;
 	text -l "Shading Group Name";
 	rowLayout -p "columnLayout1" -nc 3;
-    textField -en 1 -ann "New name of the shader group" -tx $shadingGroupTextFieldText -ed 0 "SGTextField";
+	textField -en 1 -ann "New name of the shader group" -tx $shadingGroupTextFieldText -ed 0 "SGTextField";
 	checkBox -en false -ann "add _aiStSG suffix to the shadere group name" -l "Add Suffix" -v true "SGSuffixCheckBox";
 	checkBox -ann "Auto-Rename shader group to the material's name" -l "Auto-Rename" -v true -cc dsblSGTextField "SGAutoRenameCheckBox";
 	button -p "columnLayout1" -l "Rename" -c renameShader;
@@ -44,7 +46,7 @@ proc renameShader(){
 	//new shader name
 	//ex: box
 	string $newShaderName;
-	
+
 	//new shader group name
 	//ex: cube
 	string $newShaderGroupName;
@@ -172,6 +174,7 @@ proc renameShader(){
 	}
 }
 
+
 //disable shaderTextField and shaderSuffixCheckBox if shaderAutoRenameCheckBox is checked
 proc dsblShaderTextField(){
 	//if shaderAutoRenameCheckBox is checked disable editing of shaderTextField and disable shaderSuffixCheckBox
@@ -224,6 +227,7 @@ proc outro (){
 	print "\n";
 	print "Renaming complete";
 }
+
 
 //execute script
 renameShader_UI();
