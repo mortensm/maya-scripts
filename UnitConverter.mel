@@ -1,0 +1,90 @@
+//Unit Converter
+//v1.0
+//author Mitchell Mortenson
+
+//Instructions
+/*
+
+1. Copy all code 
+2. Paste into the Maya script editor under a MEL tab 
+3. Click 'Execute'
+4. (Optional) Click 'Save script to shelf' to save this script to your current shelf
+
+*/
+
+global proc Unit_Converter(){
+	if(`window -q -ex "Unit_Converter"`)deleteUI("Unit_Converter");
+	window -t "Unit Converter" "Unit_Converter";
+	columnLayout -adj true "columnLayout1";
+	rowLayout -nc 1;
+	text -l "Width in inches";
+	rowLayout -p "columnLayout1" -nc 2;
+	floatField -w 175 -v 1.0 -min 0.0 -pre 4 "floatFieldX";
+	button -l "Convert to cm" -c "convertUnitsX";
+	rowLayout -p "columnLayout1" -nc 1;
+	text -l "Height in inches";
+	rowLayout -p "columnLayout1" -nc 2;
+	floatField -w 175 -v 1.0 -min 0.0 -pre 4 "floatFieldY";
+	button -l "Convert to cm" -c "convertUnitsY";
+	rowLayout -p "columnLayout1" -nc 1;
+	text -l "Depth in inches";
+	rowLayout -p "columnLayout1" -nc 2;
+	floatField -w 175 -v 1.0 -min 0.0 -pre 4 "floatFieldZ";
+	button -l "Convert to cm" -c "convertUnitsZ";
+	button -p "columnLayout1" -l "Convert all to cm" -c convertUnitsAll;
+	showWindow "Unit_Converter";
+}
+proc convertUnitsX(){
+	string $selectedObjs[] = `ls -sl`;
+	float $oldValueX = `floatField -q -v floatFieldX`;
+	float $newValueX = `floatField -q -v floatFieldX` * 2.54;
+
+		for ($eachX in $selectedObjs){
+			print $oldValueX;
+			print "in = ";
+			print $newValueX;
+			print "cm";
+			print "\n";
+			print "\n";
+			setAttr ($eachX + ".scaleX") $newValueX;
+		}
+}
+
+proc convertUnitsY(){
+	string $selectedObjs[] = `ls -sl`;
+	float $oldValueY = `floatField -q -v floatFieldY`;
+	float $newValueY = `floatField -q -v floatFieldY` * 2.54;
+
+		for ($eachY in $selectedObjs){
+			print $oldValueY;
+			print "in = ";
+			print $newValueY;
+			print "cm";
+			print "\n";
+			print "\n";
+			setAttr ($eachY + ".scaleY") $newValueY;
+		}
+}
+
+proc convertUnitsZ(){
+	string $selectedObjs[] = `ls -sl`;
+	float $oldValueZ = `floatField -q -v floatFieldZ`;
+	float $newValueZ = `floatField -q -v floatFieldZ` * 2.54;
+
+		for ($eachZ in $selectedObjs){
+			print $oldValueZ;
+			print "in = ";
+			print $newValueZ;
+			print "cm";
+			print "\n";
+			print "\n";
+			setAttr ($eachZ + ".scaleZ") $newValueZ;
+		}
+}
+
+proc convertUnitsAll(){
+	convertUnitsX;
+	convertUnitsY;
+	convertUnitsZ;
+}
+Unit_Converter();
