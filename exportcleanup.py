@@ -1,5 +1,5 @@
 #Export Cleanup
-#v1.1.4
+#v1.2
 #author Mitchell Mortenson
 
 
@@ -26,21 +26,26 @@ def makeFaceted():
             continue
 
 
-def moveToOrigin(xAxis, yAxis, zAxis):
+def moveToOrigin(xAxis, yAxis, zAxis, onlySelectedGroups):
     originalSelectedObjs = cmds.ls(sl = True, l = True, type = 'transform')
     # https://stackoverflow.com/questions/50759124/maya-mel-script-drop-pivot-to-bottom-of-object
-    selectedObjs = cmds.ls(sl = True, l = True, dag = True)
+    selectedObjs = cmds.ls(sl = True, l = True)
     topNodeList = []
 
+    if (onlySelectedGroups == True):
+        for eachObj in selectedObjs:
+            if ((cmds.objectType(eachObj, isType = 'transform'))) and ((cmds.listRelatives(eachObj, shapes = True) == None)):
+                topNodeList.append(eachObj)
+                print eachObj
+    else:
+        for eachObj in selectedObjs:
+            topNode=cmds.ls(eachObj, l = True)[0].split("|")[1]
 
-    for eachObj in selectedObjs:
-        topNode=cmds.ls(eachObj, l = True)[0].split("|")[1]
+
+            topNodeList.append(topNode)
 
 
-        topNodeList.append(topNode)
-
-
-    topNodeList = list(dict.fromkeys(topNodeList))
+        topNodeList = list(dict.fromkeys(topNodeList))
 
 
     for eachTopNode in topNodeList:
@@ -168,6 +173,7 @@ def deletePreDeformerHistory():
 
 def moveToOriginCheckBox(arg):
     cmds.checkBoxGrp ('moveToOriginXYZ_ui', edit = True, en = arg)
+    cmds.checkBoxGrp ('moveToOriginEachGroup_ui', edit = True, en = arg)
 
 
 def changeHistoryCheckBox(arg):
@@ -178,7 +184,10 @@ def changeHistoryCheckBox(arg):
 
 def changeFreezeTransformsCheckBox(arg):
     cmds.checkBoxGrp ('moveToOrigin_ui', edit = True, en = arg)
-    cmds.checkBoxGrp ('moveToOriginXYZ_ui', edit = True, en = arg)
+
+    if (cmds.checkBoxGrp ('moveToOrigin_ui', q = True, v1 = True)):
+        cmds.checkBoxGrp ('moveToOriginEachGroup_ui', edit = True, en = arg)
+        cmds.checkBoxGrp ('moveToOriginXYZ_ui', edit = True, en = arg)
 
 
 def run(*args):
@@ -207,12 +216,16 @@ def run(*args):
                 else:
                     zAxis = False
 
+                if (cmds.checkBoxGrp('moveToOriginEachGroup_ui', q = True, v1 = True)):
+                    onlySelectedGroups = True
+                else:
+                    onlySelectedGroups = False
 
                 if ((xAxis == True) or (yAxis == True) or (zAxis == True)):
                     freezeTransforms()
-                    moveToOrigin(xAxis, yAxis, zAxis)
+                    moveToOrigin(xAxis, yAxis, zAxis, onlySelectedGroups)
                 else:
-                    print "No axis is checked. Skipping move to origin"
+                    print "No axis are checked. Skipping move to origin"
 
 
         if (cmds.checkBoxGrp ('freezeTransforms_ui', q = True, v1 = True)):
@@ -255,6 +268,7 @@ def exportCleanup_ui():
     cmds.checkBoxGrp('freezeTransforms_ui', ncb = True, l1 = u'Freeze Transforms', v1 = True, cc = changeFreezeTransformsCheckBox)
     cmds.checkBoxGrp('ResetPivots_ui', ncb = True, l1 = u'Reset Pivots', v1 = True)
     cmds.checkBoxGrp('moveToOrigin_ui', ncb = True, l1 = u'Move to Origin', v1 = True, cc = moveToOriginCheckBox)
+    cmds.checkBoxGrp('moveToOriginEachGroup_ui', cw = [[1, 30]], ncb = 1, l=u' ', l1 = u'Only Selected Groups', v1 = False)
     cmds.checkBoxGrp('moveToOriginXYZ_ui', cw = [[1, 30], [2, 30], [3, 30]], ncb = 3, l=u' ', l1 = u'X', l2 = u'Y', l3 = u'Z', v1 = True, v2 = True, v3 = True)
     cmds.checkBoxGrp('deleteHistory_ui', ncb = True, l1 = u'Delete History', v1 = True, cc = changeHistoryCheckBox)
     cmds.radioCollection()
