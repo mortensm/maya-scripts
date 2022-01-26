@@ -13,8 +13,8 @@
 */
 
 global proc Unit_Converter(){
-	if(`window -q -ex "Unit_Converter"`)deleteUI("Unit_Converter");
-	window -t "Unit Converter" "Unit_Converter";
+	if(`window -q -ex "Unit_Converter_ui"`)deleteUI("Unit_Converter_ui");
+	window -t "Unit Converter" "Unit_Converter_ui";
 	columnLayout -adj true "columnLayout1";
 	rowLayout -nc 1;
 	text -l "Width in inches";
@@ -32,7 +32,7 @@ global proc Unit_Converter(){
 	floatField -w 175 -v 1.0 -min 0.0 -pre 4 "floatFieldZ";
 	button -l "Convert to cm" -c "convertUnitsZ";
 	button -p "columnLayout1" -l "Convert all to cm" -c convertUnitsAll;
-	showWindow "Unit_Converter";
+	showWindow "Unit_Converter_ui";
 }
 proc convertUnitsX(){
 	string $selectedObjs[] = `ls -sl`;
