@@ -1,5 +1,5 @@
 //Rename Shader
-//v1.0.1
+//v1.0.2
 //author Mitchell Mortenson
 
 //Instructions
@@ -17,8 +17,8 @@
 
 //GUI setup
 global proc renameShader_UI(){
-	if(`window -q -ex "window1"`)deleteUI("window1");
-	window -t "Rename Shader" -s false "window1";
+	if(`window -q -ex "renameShader_ui"`)deleteUI("renameShader_ui");
+	window -t "Rename Shader" -s false "renameShader_ui";
 
 	string $shaderTextFieldText;
 	string $shadingGroupTextFieldText;
@@ -38,7 +38,7 @@ global proc renameShader_UI(){
 	checkBox -en false -ann "add _aiStSG suffix to the shadere group name" -l "Add Suffix" -v true "SGSuffixCheckBox";
 	checkBox -ann "Auto-Rename shader group to the material's name" -l "Auto-Rename" -v true -cc dsblSGTextField "SGAutoRenameCheckBox";
 	button -p "columnLayout1" -l "Rename" -c renameShader;
-	showWindow "window1";
+	showWindow "renameShader_ui";
 }
 
 
