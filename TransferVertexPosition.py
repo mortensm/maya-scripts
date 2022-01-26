@@ -1,5 +1,5 @@
 #Transfer Vertex Position
-#v2.0
+#v2.1
 #author Mitchell Mortenson
 
 #Install instructions
@@ -25,8 +25,8 @@ def getVertecies(*args):
         # eachOrigVertexNum = eachOrigVertexNumTmp.split("]")[0]
         eachOrigVertexPos = cmds.xform(eachOrigVertex, q = True, ws = True, t = True)
         origVerteciesPosList.append(eachOrigVertexPos)
-        print eachOrigVertex + ": " + str(eachOrigVertexPos)
-    print "Got " + str(len(origVerteciesPosList)) + " vertecies"
+        print (eachOrigVertex + ": " + str(eachOrigVertexPos))
+    print ("Got " + str(len(origVerteciesPosList)) + " vertecies")
 
 
 def putVertecies(*args):
@@ -45,25 +45,25 @@ def transferVertexPosition(*args):
 
         numOfVertOrgMesh = cmds.polyEvaluate(orgMesh, vertex = True)
         numOfVertTargMesh = cmds.polyEvaluate(targMesh, vertex = True)
-        print str(numOfVertOrgMesh) + " verts"
+        print (str(numOfVertOrgMesh) + " verts")
 
         if (numOfVertOrgMesh == numOfVertTargMesh):
             vertexIDOrgMesh = 0
 
             while vertexIDOrgMesh != numOfVertOrgMesh:
                 getVertPos = cmds.xform((str(orgMesh) + ".vtx[" + str(vertexIDOrgMesh) + "]"), q = True, ws = True, t = True)
-                print "vert " + str(vertexIDOrgMesh + 1)  + ": " + str(getVertPos)
+                print ("vert " + str(vertexIDOrgMesh + 1)  + ": " + str(getVertPos))
                 cmds.xform((str(targMesh) + ".vtx[" + str(vertexIDOrgMesh) + "]"), ws = True, t = getVertPos)
                 vertexIDOrgMesh += 1
 
             pivTransOrigMesh = cmds.xform((orgMesh), q = True, a = True, ws = True, piv = True)
             cmds.xform((targMesh),  a = True, ws = True, piv = [pivTransOrigMesh[0], pivTransOrigMesh[1], pivTransOrigMesh[2]])
     else:
-        print "Select two objects"
+        print ("Select two objects")
 
 def transferVertexPosition_ui():
-    if(cmds.window('window1_ui', q = True, ex = True)): cmds.deleteUI('window1_ui')
-    cmds.window('window1_ui', s = False, t = u'Transfer Vertex Position', tlb = True, wh = (150, 18), rtf = True)
+    if(cmds.window('transferVertexPositionWindow_ui', q = True, ex = True)): cmds.deleteUI('transferVertexPositionWindow_ui')
+    cmds.window('transferVertexPositionWindow_ui', s = False, t = u'Transfer Vertex Position', tlb = True, wh = (150, 18), rtf = True)
     cmds.columnLayout(adj = True)
     cmds.separator()
     cmds.text(l = u'Select both the original mesh and the target mesh in that order, then click Run', ww = True)
@@ -73,6 +73,6 @@ def transferVertexPosition_ui():
     cmds.button(l = u'Get Vertex Positions', c = getVertecies)
     cmds.text(l = u'\nSelect the vertecies in the same order on the target mesh that you want to transfer, then click Transfer Vertex Positions', ww = True)
     cmds.button(l = u'Transfer Vertex Positions', c = putVertecies)
-    cmds.showWindow('window1_ui')
+    cmds.showWindow('transferVertexPositionWindow_ui')
 
 transferVertexPosition_ui()
