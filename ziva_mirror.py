@@ -1,20 +1,24 @@
-#1.0
+#Ziva Mirror
+#1.0.1
+#author Mitchell Mortenson
+
 #Some code used from https://community.zivadynamics.com/d/46-mirror-the-tissues-and-attchments/13
 
 #########INSTRUCTIONS##########
-#Copy and paste into maya script editor
-#Run
+# 1. Copy all code
+# 2. Paste into the Maya script editor under a Python tab
+# 3. Click 'Execute'
+# 4. (Optional) Click 'Save script to shelf' to save this script to your current shelf
 
 from maya import cmds
 import zBuilder.zMaya
-import maya.cmds as mc
 import zBuilder.builders.ziva as zva
 
 def lefttoright(args=none):
 	zBuilder.zMaya.rename_ziva_nodes()
-	selection = mc.ls(sl = True)
+	selection = cmds.ls(sl = True)
 	for obj in selection :
-	    mc.select(obj)
+	    cmds.select(obj)
 	    zObj = zva.Ziva()
 	    zObj.retrieve_from_scene_selection()
 	    zObj.string_replace( '^l_', 'r_' )
@@ -25,9 +29,9 @@ def lefttoright(args=none):
 
 def righttoleft(args=none):
 	zBuilder.zMaya.rename_ziva_nodes()
-	selection = mc.ls(sl = True)
+	selection = cmds.ls(sl = True)
 	for obj in selection :
-	    mc.select(obj)
+	    cmds.select(obj)
 	    zObj = zva.Ziva()
 	    zObj.retrieve_from_scene_selection()
 	    zObj.string_replace( '^r_', 'l_' )
@@ -35,13 +39,13 @@ def righttoleft(args=none):
 	    zObj.string_replace( '_r_', '_l_' )
 	    zObj.string_replace( '_R_', '_L_' )
 	    zObj.build()
-        
+
 def ziva_mirrorUI():
-	if(cmds.window('window1_ui',q=True,ex=True)):cmds.deleteUI('window1_ui')
-	cmds.window('window1_ui',t=u'Ziva_Mirror')
+	if(cmds.window('ziva_mirrorUI_ui',q=True,ex=True)):cmds.deleteUI('ziva_mirrorUI_ui')
+	cmds.window('ziva_mirrorUI_ui',t=u'Ziva_Mirror')
 	cmds.columnLayout(adj=True)
 	cmds.menuBarLayout()
 	cmds.button(l=u'L--->R',c=lefttoright)
 	cmds.button(l=u'R--->L',c=righttoleft)
-	cmds.showWindow('window1_ui')
+	cmds.showWindow('ziva_mirrorUI_ui')
 ziva_mirrorUI()
