@@ -1,5 +1,5 @@
 #Export Cleanup
-#v1.2
+#v1.3
 #author Mitchell Mortenson
 
 
@@ -36,7 +36,7 @@ def moveToOrigin(xAxis, yAxis, zAxis, onlySelectedGroups):
         for eachObj in selectedObjs:
             if ((cmds.objectType(eachObj, isType = 'transform'))) and ((cmds.listRelatives(eachObj, shapes = True) == None)):
                 topNodeList.append(eachObj)
-                print eachObj
+                print (eachObj)
     else:
         for eachObj in selectedObjs:
             topNode=cmds.ls(eachObj, l = True)[0].split("|")[1]
@@ -107,18 +107,18 @@ def moveToOrigin(xAxis, yAxis, zAxis, onlySelectedGroups):
             # if 90%+ of the vertices are above the grid
             if len(aboveGrid) >= (.9 * totalVCount):
                 cmds.move((lowestY * -1), eachTopNode, y = True, r = True, ls = True, wd = True,  puv = True)
-                print eachTopNode + " is at least 90 percent above the grid"
+                print (eachTopNode + " is at least 90 percent above the grid")
 
 
             # if 90%+  of the vertices are below the grid
             elif len(belowGrid) >= (.9 * totalVCount):
                 cmds.move((hightestY * -1), eachTopNode, y = True, r = True, ls = True, wd = True,  puv = True)
-                print eachTopNode + " is at least 90 percent below the grid"
+                print (eachTopNode + " is at least 90 percent below the grid")
 
 
             # if 90%+ of the vertices are neither above or below the grid
             else:
-                print eachTopNode + " cannot be determined in relation to the grid"
+                print (eachTopNode + " cannot be determined in relation to the grid")
 
 
         if(xAxis == True):
@@ -225,7 +225,7 @@ def run(*args):
                     freezeTransforms()
                     moveToOrigin(xAxis, yAxis, zAxis, onlySelectedGroups)
                 else:
-                    print "No axis are checked. Skipping move to origin"
+                    print ("No axis are checked. Skipping move to origin")
 
 
         if (cmds.checkBoxGrp ('freezeTransforms_ui', q = True, v1 = True)):
@@ -282,4 +282,3 @@ def exportCleanup_ui():
 
 
 exportCleanup_ui()
-
