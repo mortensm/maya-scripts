@@ -1,4 +1,4 @@
-//v4.3.0
+//v4.3.0.1
 //Author: Mitchell Mortenson
 
 //Instructions
@@ -17,8 +17,8 @@ global proc changecolor_UI (){
 	int $lastframe = `playbackOptions  -q -aet`;
 	int $frameskip = 24;
 	
-	if(`window -q -ex "window1_ui"`)deleteUI("window1_ui");
-	window -t "Random Color Changer" -rtf 1 "window1_ui";
+	if(`window -q -ex "changecolor_UI_ui"`)deleteUI("changecolor_UI_ui");
+	window -t "Random Color Changer" -rtf 1 "changecolor_UI_ui";
 	columnLayout -w 600 -adj 1 -cw 5;
 	
 	text -l "Set the frame that you want to start on" -ww 1;
@@ -58,7 +58,7 @@ global proc changecolor_UI (){
 	button -h 50 -ann "Change the colors of all selected lights." -l "Change color" -c colorchanger;
 	
 	helpLine;
-	showWindow "window1_ui";
+	showWindow "changecolor_UI_ui";
 }
 
 
